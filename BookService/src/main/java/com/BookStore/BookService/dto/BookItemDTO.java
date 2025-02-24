@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CardSach {
+public class BookItemDTO {
     private String isbn;
-    private String tenSach;
-    private String tenTacGia;
-    private Integer giaBan;
-    private Integer giaGiam;
-    private String tenAnh;
-    private Integer soLuong;
+    private String title;
+    private String author;
+    private Integer salePrice;
+    private Integer discountPrice;
+    private String image;
+    private Integer inventoryQuantity;
 }

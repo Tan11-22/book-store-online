@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Map;
 
-public interface SachRepository extends JpaRepository<Sach, String> {
+public interface BookRepository extends JpaRepository<Sach, String> {
     // query thông tin sách dạng card dùng cho trang chủ , thể loại , tìm kiếm
     @Query(value = "{call SP_LAY_DS_SACH(:start, :size)}", nativeQuery = true)
     List<Map<String, Object>> layDSSach(@Param("start") int start, @Param("size") int size);
@@ -51,5 +51,6 @@ public interface SachRepository extends JpaRepository<Sach, String> {
     @Query(value = "SELECT IDTHELOAI FROM THELOAISACH WHERE ISBN = :isbn", nativeQuery = true)
     List<Integer> getIdTheLoaiTT(@Param("isbn") String isbn);
 
-
+    @Query(value = "{call SP_GET_BOOKDTO_BY_ISBN(:isbn)}", nativeQuery = true)
+    Map<String, Object> getBookDtoByIsbn(@Param("isbn") String isbn);
 }

@@ -62,7 +62,10 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "sach-service/sach/search",
             "sach-service/sach/search-amount",
             "sach-service/sach/ds-tg",
-            "sach-service/sach/ds-tl"
+            "sach-service/sach/ds-tl",
+
+            // test
+            "order-service/.*"
 
     };
 

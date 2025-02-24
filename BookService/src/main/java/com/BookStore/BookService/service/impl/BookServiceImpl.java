@@ -1,15 +1,16 @@
 package com.BookStore.BookService.service.impl;
 
 import com.BookStore.BookService.dto.*;
-import com.BookStore.BookService.model.HinhAnh;
-import com.BookStore.BookService.model.Sach;
-import com.BookStore.BookService.model.TacGia;
-import com.BookStore.BookService.model.TheLoai;
-import com.BookStore.BookService.repository.SachRepository;
-import com.BookStore.BookService.service.SachService;
+import com.BookStore.BookService.model.Image;
+import com.BookStore.BookService.model.Author;
+import com.BookStore.BookService.model.Category;
+import com.BookStore.BookService.repository.BookRepository;
+import com.BookStore.BookService.service.BookService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 
@@ -19,144 +20,128 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import java.util.stream.Collectors;
 
 @Service
-public class SachServiceImpl implements SachService {
+public class BookServiceImpl implements BookService {
     @Autowired
-    private SachRepository sachRepository;
+    private BookRepository bookRepository;
     @Autowired
     private DataSource dataSource;
-    Logger logger = LoggerFactory.getLogger(SachServiceImpl.class.getName());
+    Logger logger = LoggerFactory.getLogger(BookServiceImpl.class.getName());
+
 
     // query thông tin sách dạng card dùng cho trang chủ , thể loại , tìm kiếm
     @Override
-    public BookStoreResponse<List<CardSach>> layDSSach(int start, int size) {
-        List<Map<String, Object>> data = sachRepository.layDSSach(start, size);
-        List<CardSach> result = data.stream().map(map -> mapSachToCard(map)).toList();
-        return BookStoreResponse.<List<CardSach>>builder()
+    public BookStoreResponse<List<BookItemDTO>> getListBookItems(int start, int size) {
+        List<Map<String, Object>> data = bookRepository.layDSSach(start, size);
+        List<BookItemDTO> result = data.stream().map(map -> mapBookResultToDTO(map)).toList();
+        return BookStoreResponse.<List<BookItemDTO>>builder()
                 .code(200)
                 .status("Lấy danh sách card sách thành công!")
                 .data(result).build();
     }
 
-    private CardSach mapSachToCard(Map<String, Object> data) {
-        return CardSach.builder()
+    private BookItemDTO mapBookResultToDTO(Map<String, Object> data) {
+        return BookItemDTO.builder()
                 .isbn((String) data.get("ISBN"))
-                .tenSach((String) data.get("TENSACH"))
-                .tenTacGia((String) data.get("TENTACGIA"))
-                .giaBan((Integer) data.get("GIABAN"))
-                .giaGiam((Integer) data.get("GIAGIAM"))
-                .tenAnh((String) data.get("TENANH"))
-                .soLuong((Integer) data.get("SOLUONG"))
+                .title((String) data.get("TENSACH"))
+                .author((String) data.get("TENTACGIA"))
+                .salePrice((Integer) data.get("GIABAN"))
+                .discountPrice((Integer) data.get("GIAGIAM"))
+                .image((String) data.get("TENANH"))
+                .inventoryQuantity((Integer) data.get("SOLUONG"))
                 .build();
     }
 
 
     // những câu query để lấy thông tin chi tiết 1 cuốn sách
     @Override
-    public BookStoreResponse<ChiTietSachDTO> layChiTietSach(String isbn) {
-        ChiTietSachDTO chiTietSachDTO = taoDoiTuongChiTietSach(isbn);
-        BookStoreResponse<ChiTietSachDTO> chiTietSachDTOBookStoreResponse = BookStoreResponse.<ChiTietSachDTO>builder()
+    public BookStoreResponse<BookInfoDTO> getBookInfo(String isbn) {
+        BookInfoDTO bookInfo = findBookInfo(isbn);
+        return BookStoreResponse.<BookInfoDTO>builder()
                 .code(200)
                 .status("Lấy thông tin chi tiết của sách thành công!")
-                .data(chiTietSachDTO)
+                .data(bookInfo)
                 .build();
-        return chiTietSachDTOBookStoreResponse;
+
     }
 
-    @Override
-    public BookStoreResponse<List<CardSach>> timSach(String search, int start, int size) {
-        List<Map<String, Object>> data = sachRepository.timSach(search, start, size);
-        if (data.size() == 0) {
-            return BookStoreResponse.<List<CardSach>>builder()
-                    .code(201)
-                    .status("Không tìm thấy sách phù hợp!")
-                    .data(null).build();
-        }
-        List<CardSach> result = data.stream().map(map -> mapSachToCard(map)).toList();
-        return BookStoreResponse.<List<CardSach>>builder()
-                .code(200)
-                .status("Lấy danh sách card sách thành công!")
-                .data(result).build();
-    }
-
-    @Override
-    public BookStoreResponse demSLSachTimRa(String search) {
-        return BookStoreResponse.<Integer>builder()
-                .code(200)
-                .status("Lấy tổng số lượng thành công!")
-                .data(sachRepository.demSachTimRa(search)).build();
-    }
-
-    @Override
-    public BookStoreResponse layDSSachBanChay(int start, int size) {
-        List<Map<String, Object>> data = sachRepository.layDSSachBanChay(start, size);
-        List<CardSach> result = data.stream().map(map -> mapSachToCard(map)).toList();
-        return BookStoreResponse.<List<CardSach>>builder()
-                .code(200)
-                .status("Lấy danh sách card sách thành công!")
-                .data(result).build();
-    }
-
-    private ChiTietSachDTO taoDoiTuongChiTietSach(String isbn) {
-        SachDTO sachDTO = mapToDTO(sachRepository.layChiTietSach(isbn));
-        List<HinhAnh> hinhAnhs = mapObToHA(isbn);
-        List<TacGia> tacGias = mapObToTG(isbn);
-        List<TheLoai> theLoais = mapObToTL(isbn);
-//        List<BinhLuanDTO> binhLuanDTOS = mapToBLDTO(isbn);
-
-        return ChiTietSachDTO.builder()
-                .sachDTO(sachDTO)
-                .hinhAnhs(hinhAnhs)
-                .tacGias(tacGias)
-                .theLoais(theLoais)
-//                .binhLuanDTOS(binhLuanDTOS)
-                .build();
-    }
-
-    private SachDTO mapToDTO(Map<String, Object> data) {
-        return SachDTO.builder()
-                .isbn((String) data.get("ISBN"))
-                .tenSach((String) data.get("TENSACH"))
-                .khuonKho((String) data.get("KHUONKHO"))
-                .soTrang((Integer) data.get("SOTRANG"))
-                .trongLuong((Integer) data.get("TRONGLUONG"))
-                .moTa((String) data.get("MOTA"))
-                .soLuong((Integer) data.get("SOLUONG"))
-                .maNhaXuatBan((String) data.get("MANHAXUATBAN"))
-                .tenNhaXuatBan((String) data.get("TENNHAXUATBAN"))
-                .giaBan((Integer) data.get("GIABAN"))
-                .giaGiam((Integer) data.get("GIAGIAM"))
-                .soBinhLuan((Integer) data.get("SOBINHLUAN"))
-                .tongDiem((Integer) data.get("TONGDIEM"))
-                .build();
-    }
-
-//    private List<BinhLuanDTO> mapToBLDTO(String isbn) {
-//        List<Map<String,Object>> data = sachRepository.layDanhSachBinhLuanCuaSach(isbn);
-//        return data.stream().map(map ->
-//                BinhLuanDTO.builder()
-//                        .idBinhLuan((Integer) map.get("IDBINHLUAN"))
-//                        .tenDangNhap((String) map.get("TENDANGNHAP"))
-//                        .isbn((String) map.get("ISBN"))
-//                        .noiDung((String) map.get("NOIDUNG"))
-//                        .diem((Integer) map.get("DIEM"))
-//                        .ngay((Date) map.get("NGAY"))
-//                        .hoTen((String) map.get("HOTEN"))
-//                        .hinhAnh((String) map.get("HINHANH"))
-//                        .build()
-//                ).collect(Collectors.toList());
+//    @Override
+//    public BookStoreResponse<List<BookItemDTO>> timSach(String search, int start, int size) {
+//        List<Map<String, Object>> data = bookRepository.timSach(search, start, size);
+//        if (data.size() == 0) {
+//            return BookStoreResponse.<List<BookItemDTO>>builder()
+//                    .code(201)
+//                    .status("Không tìm thấy sách phù hợp!")
+//                    .data(null).build();
+//        }
+//        List<BookItemDTO> result = data.stream().map(map -> mapBookResultToDTO(map)).toList();
+//        return BookStoreResponse.<List<BookItemDTO>>builder()
+//                .code(200)
+//                .status("Lấy danh sách card sách thành công!")
+//                .data(result).build();
 //    }
 
-    private List<TacGia> mapObToTG(String isbn) {
-        List<Map<String, Object>> data = sachRepository.layDanhSachTacGiaSach(isbn);
+//    @Override
+//    public BookStoreResponse demSLSachTimRa(String search) {
+//        return BookStoreResponse.<Integer>builder()
+//                .code(200)
+//                .status("Lấy tổng số lượng thành công!")
+//                .data(bookRepository.demSachTimRa(search)).build();
+//    }
+
+    @Override
+    public BookStoreResponse getBestSellingBooks(int start, int size) {
+        List<Map<String, Object>> data = bookRepository.layDSSachBanChay(start, size);
+        List<BookItemDTO> result = data.stream().map(map -> mapBookResultToDTO(map)).toList();
+        return BookStoreResponse.<List<BookItemDTO>>builder()
+                .code(200)
+                .status("Lấy danh sách card sách thành công!")
+                .data(result).build();
+    }
+
+    private BookInfoDTO findBookInfo(String isbn) {
+        BookOverviewDTO bookOverviewDTO = mapBookToBOverviewDTO(bookRepository.layChiTietSach(isbn));
+        List<Image> images = mapObjectToImage(isbn);
+        List<Author> authors = mapObjectToAuthor(isbn);
+        List<Category> categories = mapObjectToCategory(isbn);
+
+        return BookInfoDTO.builder()
+                .bookOverviewDTO(bookOverviewDTO)
+                .images(images)
+                .authors(authors)
+                .categories(categories)
+                .build();
+    }
+
+    private BookOverviewDTO mapBookToBOverviewDTO(Map<String, Object> data) {
+        return BookOverviewDTO.builder()
+                .isbn((String) data.get("ISBN"))
+                .title((String) data.get("TENSACH"))
+                .formatSize((String) data.get("KHUONKHO"))
+                .pageCount((Integer) data.get("SOTRANG"))
+                .weight((Integer) data.get("TRONGLUONG"))
+                .description((String) data.get("MOTA"))
+                .quantity((Integer) data.get("SOLUONG"))
+                .publisherCode((String) data.get("MANHAXUATBAN"))
+                .publisherName((String) data.get("TENNHAXUATBAN"))
+                .salePrice((Integer) data.get("GIABAN"))
+                .discountPrice((Integer) data.get("GIAGIAM"))
+                .reviewCount((Integer) data.get("SOBINHLUAN"))
+                .totalRating((Integer) data.get("TONGDIEM"))
+                .build();
+    }
+
+
+
+    private List<Author> mapObjectToAuthor(String isbn) {
+        List<Map<String, Object>> data = bookRepository.layDanhSachTacGiaSach(isbn);
         return data.stream().map(map ->
-                TacGia.builder()
+                Author.builder()
                         .idTacGia((Integer) map.get("IDTACGIA"))
                         .ho((String) map.get("HO"))
                         .ten((String) map.get("TEN"))
@@ -164,20 +149,20 @@ public class SachServiceImpl implements SachService {
         ).collect(Collectors.toList());
     }
 
-    private List<TheLoai> mapObToTL(String isbn) {
-        List<Map<String, Object>> data = sachRepository.layDanhSachTheLoaiSach(isbn);
+    private List<Category> mapObjectToCategory(String isbn) {
+        List<Map<String, Object>> data = bookRepository.layDanhSachTheLoaiSach(isbn);
         return data.stream().map(map ->
-                TheLoai.builder()
+                Category.builder()
                         .idTheLoai((Integer) map.get("IDTHELOAI"))
                         .tenTheLoai((String) map.get("TENTHELOAI"))
                         .build()
         ).collect(Collectors.toList());
     }
 
-    private List<HinhAnh> mapObToHA(String isbn) {
-        List<Map<String, Object>> data = sachRepository.layDanhSachHinhAnhSach(isbn);
+    private List<Image> mapObjectToImage(String isbn) {
+        List<Map<String, Object>> data = bookRepository.layDanhSachHinhAnhSach(isbn);
         return data.stream().map(map ->
-                HinhAnh.builder()
+                Image.builder()
                         .idAnh((Integer) map.get("IDANH"))
                         .isbn((String) map.get("ISBN"))
                         .filename((String) map.get("FILENAME"))
@@ -186,14 +171,14 @@ public class SachServiceImpl implements SachService {
     }
 
 
-    private List<CardSach> timSachNangCao(String query,
-                                          List<String> tacGiaIDs,
-                                          List<String> theLoaiIDs,
-                                          int sapXep,
-                                          int start,
-                                          int size
+    private List<BookItemDTO> searchAdvancedBooks(String query,
+                                             List<String> tacGiaIDs,
+                                             List<String> theLoaiIDs,
+                                             int sapXep,
+                                             int start,
+                                             int size
     ) {
-        List<CardSach> books = new ArrayList<>();
+        List<BookItemDTO> books = new ArrayList<>();
         String find = "SELECT * FROM SACH WHERE";
         String find1 = " ISBN LIKE N'%" + query + "%' OR TENSACH LIKE N'%" + query + "%' OR MOTA LIKE N'%" + query + "%' ";
         String find2 = "";
@@ -265,14 +250,14 @@ public class SachServiceImpl implements SachService {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                CardSach book = new CardSach();
+                BookItemDTO book = new BookItemDTO();
                 book.setIsbn(rs.getString("ISBN"));
-                book.setTenSach(rs.getString("TENSACH"));
-                book.setTenTacGia(rs.getString("TENTACGIA"));
-                book.setGiaBan(rs.getInt("GIABAN"));
-                book.setGiaGiam(rs.getInt("GIAGIAM"));
-                book.setTenAnh(rs.getString("TENANH"));
-                book.setSoLuong(rs.getInt("SOLUONG"));
+                book.setTitle(rs.getString("TENSACH"));
+                book.setAuthor(rs.getString("TENTACGIA"));
+                book.setSalePrice(rs.getInt("GIABAN"));
+                book.setDiscountPrice(rs.getInt("GIAGIAM"));
+                book.setImage(rs.getString("TENANH"));
+                book.setInventoryQuantity(rs.getInt("SOLUONG"));
                 books.add(book);
             }
         } catch (SQLException e) {
@@ -354,25 +339,25 @@ public class SachServiceImpl implements SachService {
         return result;
     }
 
-    public BookStoreResponse<List<CardSach>> timSach1(Map<String, Object> data) {
+    public BookStoreResponse<List<BookItemDTO>> searchBooks(Map<String, Object> data) {
         String search = (String)data.get("search");
-        List<String> tacGiaIDs= (List<String>) data.get("tacGiaIDs");
-        List<String> theLoaiIDs =  (List<String>) data.get("theLoaiIDs");
+        List<String> authorIDs= (List<String>) data.get("tacGiaIDs");
+        List<String> categoryIDs =  (List<String>) data.get("theLoaiIDs");
         Integer sapXep = (Integer) data.get("sapXep");
         Integer start = (Integer) data.get("start");
         Integer size = (Integer) data.get("size");
-        List<CardSach> books = timSachNangCao(search, tacGiaIDs, theLoaiIDs,sapXep, start, size);
-        return BookStoreResponse.<List<CardSach>>builder()
+        List<BookItemDTO> books = searchAdvancedBooks(search, authorIDs, categoryIDs,sapXep, start, size);
+        return BookStoreResponse.<List<BookItemDTO>>builder()
                 .code(200)
                 .status("")
                 .data(books).build();
     }
 
-    public BookStoreResponse<Integer> countTimSach1(Map<String, Object> data) {
+    public BookStoreResponse<Integer> countSearchResults(Map<String, Object> data) {
         String search = (String)data.get("search");
-        List<String> tacGiaIDs= (List<String>) data.get("tacGiaIDs");
-        List<String> theLoaiIDs =  (List<String>) data.get("theLoaiIDs");
-        Integer count = demSoLuongSachTimNangCao(search, tacGiaIDs, theLoaiIDs);
+        List<String> authorIDs= (List<String>) data.get("tacGiaIDs");
+        List<String> categoryIDs =  (List<String>) data.get("theLoaiIDs");
+        Integer count = demSoLuongSachTimNangCao(search, authorIDs, categoryIDs);
         return BookStoreResponse.<Integer>builder()
                 .code(200)
                 .status("")
@@ -389,8 +374,8 @@ public class SachServiceImpl implements SachService {
 
 
 
-    private TheLoai mapDataToTL(Map<String, Object> data) {
-        return TheLoai.builder()
+    private Category mapDataToTL(Map<String, Object> data) {
+        return Category.builder()
                 .idTheLoai((Integer) data.get("IDTHELOAI"))
                 .tenTheLoai((String) data.get("TENTHELOAI"))
                 .build();
@@ -398,7 +383,7 @@ public class SachServiceImpl implements SachService {
 
     @Override
     public BookStoreResponse<List<TacGiaDTO>> layTCTG() {
-        List<TacGiaDTO> result = sachRepository.layTCTG().stream().map(map -> mapDataToTG(map)).toList();
+        List<TacGiaDTO> result = bookRepository.layTCTG().stream().map(map -> mapDataToTG(map)).toList();
         return BookStoreResponse.<List<TacGiaDTO>>builder()
                 .code(200)
                 .status("Lấy danh sách tác giả thành công!")
@@ -407,18 +392,18 @@ public class SachServiceImpl implements SachService {
     }
 
     @Override
-    public BookStoreResponse<List<TheLoai>> layTCTL() {
-        List<TheLoai> result = sachRepository.layTCTL().stream().map(map -> mapDataToTL(map)).toList();
-        return BookStoreResponse.<List<TheLoai>>builder()
+    public BookStoreResponse<List<Category>> layTCTL() {
+        List<Category> result = bookRepository.layTCTL().stream().map(map -> mapDataToTL(map)).toList();
+        return BookStoreResponse.<List<Category>>builder()
                 .code(200)
                 .status("Lấy danh sách thể loại thành công!")
                 .data(result)
                 .build();
     }
 
-    private List<CardSach> getSachTuongTu(String isbn) {
-        List<CardSach> books = new ArrayList<>();
-        List<Integer> idTheLoais = sachRepository.getIdTheLoaiTT(isbn);
+    private List<BookItemDTO> getSimilarBooks (String isbn) {
+        List<BookItemDTO> books = new ArrayList<>();
+        List<Integer> idTheLoais = bookRepository.getIdTheLoaiTT(isbn);
         System.out.println(idTheLoais);
         String find = "SELECT * FROM SACH WHERE";
 //        String find1 = " ISBN LIKE '%" + query + "%' OR TENSACH LIKE '%" + query + "%'";
@@ -451,13 +436,14 @@ public class SachServiceImpl implements SachService {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                CardSach book = new CardSach();
+                BookItemDTO book = new BookItemDTO();
                 book.setIsbn(rs.getString("ISBN"));
-                book.setTenSach(rs.getString("TENSACH"));
-                book.setTenTacGia(rs.getString("TENTACGIA"));
-                book.setGiaBan(rs.getInt("GIABAN"));
-                book.setGiaGiam(rs.getInt("GIAGIAM"));
-                book.setTenAnh(rs.getString("TENANH"));
+                book.setTitle(rs.getString("TENSACH"));
+                book.setAuthor(rs.getString("TENTACGIA"));
+                book.setSalePrice(rs.getInt("GIABAN"));
+                book.setDiscountPrice(rs.getInt("GIAGIAM"));
+                book.setImage(rs.getString("TENANH"));
+                book.setInventoryQuantity(rs.getInt("SOLUONG"));
                 books.add(book);
             }
         } catch (SQLException e) {
@@ -466,11 +452,27 @@ public class SachServiceImpl implements SachService {
         return books;
     }
     @Override
-    public BookStoreResponse<List<CardSach>> getSachCungTheLoai(String isbn) {
-        List<CardSach> books = getSachTuongTu(isbn);
-        return BookStoreResponse.<List<CardSach>>builder()
+    public BookStoreResponse<List<BookItemDTO>> getBooksInSameCategory(String isbn) {
+        List<BookItemDTO> books = getSimilarBooks (isbn);
+        return BookStoreResponse.<List<BookItemDTO>>builder()
                 .code(200)
                 .status("Lấy danh sách sách cùng thể loại thành công!")
                 .data(books).build();
     }
+    @Override
+    @Cacheable(value = "books", key = "#isbn")
+    public BookDto getBookDtoByIsbn(String isbn) {
+        Map<String, Object> book = bookRepository.getBookDtoByIsbn(isbn);
+        return BookDto.builder()
+                .isbn(isbn)
+                .title((String) book.get("TITLE"))
+                .salePrice((Integer) book.get("SALE_PRICE"))
+                .discountPrice((Integer) book.get("DISCOUNT_PRICE"))
+                .image((String) book.get("IMAGE"))
+                .pageCount((Integer) book.get("PAGE_COUNT"))
+                .weight((Integer) book.get("WEIGHT"))
+                .inventoryQuantity((Integer) book.get("INVENTORY_QUANTITY"))
+                .build();
+    }
+    
 }

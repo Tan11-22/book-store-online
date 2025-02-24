@@ -1,0 +1,51 @@
+server:
+  port: 3004
+spring:
+  application:
+    name: order-service
+
+
+  cloud:
+    consul:
+      discovery:
+        instance-id: ${spring.application.name}-${server.port}
+        prefer-ip-address: true
+      config:
+        enabled: false
+      host: localhost
+      port: 8500
+
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+
+
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/bookstore_order
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+
+grpc:
+  client:
+    book-service:
+      address: static://localhost:9090
+      negotiation-type: plaintext
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: metrics
+  endpoint:
+    metrics:
+      enabled: true

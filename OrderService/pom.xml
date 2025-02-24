@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.BookStore</groupId>
-	<artifactId>BookService</artifactId>
+	<artifactId>OrderService</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>BookStoreOnline</name>
+	<name>OrderService</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
@@ -32,15 +32,7 @@
 		<grpc.version>1.58.0</grpc.version>
 	</properties>
 	<dependencies>
-
 		<!--  configuration service -->
-		<dependency>
-			<groupId>com.BookStore</groupId>
-			<artifactId>ConfigurationService</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
-
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -58,10 +50,10 @@
 
 
 
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.cloud</groupId>-->
-<!--			<artifactId>spring-cloud-starter-consul-config</artifactId>-->
-<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>org.springframework.cloud</groupId>-->
+		<!--			<artifactId>spring-cloud-starter-consul-config</artifactId>-->
+		<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -69,11 +61,7 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>com.microsoft.sqlserver</groupId>
-			<artifactId>mssql-jdbc</artifactId>
-			<scope>runtime</scope>
-		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
@@ -99,25 +87,30 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+<!--		<dependency>-->
+<!--			<groupId>net.devh</groupId>-->
+<!--			<artifactId>grpc-spring-boot-starter</artifactId>-->
+<!--			<version>3.1.0.RELEASE</version>-->
+<!--		</dependency>-->
 
 		<!-- gRPC -->
 		<dependency>
 			<groupId>net.devh</groupId>
-			<artifactId>grpc-server-spring-boot-starter</artifactId>
+			<artifactId>grpc-client-spring-boot-starter</artifactId>
 			<version>3.1.0.RELEASE</version>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>io.grpc</groupId>-->
-<!--			<artifactId>grpc-stub</artifactId>-->
-<!--			<version>${grpc.version}</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>io.grpc</groupId>-->
-<!--			<artifactId>grpc-protobuf</artifactId>-->
-<!--			<version>${grpc.version}</version>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>com.BookStore</groupId>
+			<artifactId>ConfigurationService</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 
 
+		<dependency>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 
 	</dependencies>
 	<dependencyManagement>
@@ -133,13 +126,6 @@
 	</dependencyManagement>
 
 	<build>
-<!--		<extensions>-->
-<!--			<extension>-->
-<!--				<groupId>kr.motd.maven</groupId>-->
-<!--				<artifactId>os-maven-plugin</artifactId>-->
-<!--				<version>1.7.0</version>-->
-<!--			</extension>-->
-<!--		</extensions>-->
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -153,10 +139,8 @@
 					</excludes>
 				</configuration>
 			</plugin>
-
-
-
 		</plugins>
 	</build>
+
 
 </project>
