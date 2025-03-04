@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface CartService {
     BookStoreResponse getCartItemsByUsername(String username);
+    BookStoreResponse getTotalItemsByUsername(String username);
     BookStoreResponse addCartItem(CartEntity cartItem);
     BookStoreResponse updateQuantityCartItem(CartEntity cartItem);
     BookStoreResponse removeCartItem(int cartItem);

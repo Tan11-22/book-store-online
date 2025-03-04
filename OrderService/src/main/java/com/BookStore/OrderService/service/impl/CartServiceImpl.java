@@ -37,6 +37,11 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    public BookStoreResponse getTotalItemsByUsername(String username) {
+        return null;
+    }
+
+    @Override
     @Transactional
     public BookStoreResponse addCartItem(CartEntity cartItem) {
         CartEntity item = cartRepository.findCartEntityByUsernameAndIsbn(cartItem.getUsername(), cartItem.getIsbn());

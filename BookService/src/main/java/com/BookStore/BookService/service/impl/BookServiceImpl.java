@@ -1,6 +1,7 @@
 package com.BookStore.BookService.service.impl;
 
 import com.BookStore.BookService.dto.*;
+import com.BookStore.BookService.model.BookEntity;
 import com.BookStore.BookService.model.Image;
 import com.BookStore.BookService.model.Author;
 import com.BookStore.BookService.model.Category;
@@ -474,5 +475,9 @@ public class BookServiceImpl implements BookService {
                 .inventoryQuantity((Integer) book.get("INVENTORY_QUANTITY"))
                 .build();
     }
-    
+
+    @Override
+    public BookEntity getBookEntityByIsbn(String isbn) {
+        return bookRepository.findBookEntityByIsbn(isbn).get();
+    }
 }

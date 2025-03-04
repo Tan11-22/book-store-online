@@ -1,6 +1,7 @@
 package com.BookStore.BookService.service;
 
 import com.BookStore.BookService.dto.*;
+import com.BookStore.BookService.model.BookEntity;
 import com.BookStore.BookService.model.Category;
 
 import java.util.List;
@@ -25,4 +26,5 @@ public interface BookService {
     BookStoreResponse<List<BookItemDTO>> getBooksInSameCategory(String isbn);
 
     BookDto getBookDtoByIsbn(String isbn);
+    BookEntity getBookEntityByIsbn(String isbn);
 }

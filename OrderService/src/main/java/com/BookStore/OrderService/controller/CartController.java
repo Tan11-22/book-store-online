@@ -21,19 +21,5 @@ public class CartController {
     public BookStoreResponse getCartDetailsByUsername(@RequestParam("username") String username) {
         return cartService.getCartItemsByUsername(username);
     }
-
-    @PostMapping("add")
-    public BookStoreResponse addCartItem(@RequestBody CartEntity cartEntity) {
-        return cartService.addCartItem(cartEntity);
-    }
-
-    @PostMapping("update")
-    public BookStoreResponse updateCartItem(@RequestBody CartEntity cartEntity) {
-        return cartService.updateQuantityCartItem(cartEntity);
-    }
-
-    @PostMapping("remove")
-    public BookStoreResponse removeCartItem(@RequestBody CartEntity cartEntity) {
-        return cartService.removeCartItem(cartEntity.getCartId());
-    }
+    
 }

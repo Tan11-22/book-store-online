@@ -20,17 +20,22 @@ public class BookEntity {
     @Column(name = "ISBN")
     private String isbn;
     @Column(name = "TENSACH")
-    private String tenSach;
+    private String title;
     @Column(name="KHUONKHO")
-    private String khuonKho;
+    private String sizeFormat;
+
     @Column(name = "SOTRANG")
-    private Integer soTrang;
+    private Integer pageNumber;
+
     @Column(name="TRONGLUONG")
-    private Integer trongLuong;
+    private Integer weight;
+
     @Column(name = "MOTA")
-    private String moTa;
+    private String description;
+
     @Column(name = "SOLUONG")
-    private Integer soLuong;
+    private Integer quantity;
+
     @Column(name = "MANHAXUATBAN")
-    private String maNhaXuatBan;
+    private String publisherCode;
 }

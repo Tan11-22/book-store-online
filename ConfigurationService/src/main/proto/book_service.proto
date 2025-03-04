@@ -9,6 +9,7 @@ option java_outer_classname = "BookProto";
 
 service BookService {
   rpc GetCartDetails(BookRequest) returns (BookResponse) {}
+  rpc CreateOrder(OrderReq) returns (OrderRes) {}
 }
 
 
@@ -27,4 +28,20 @@ message BookResponse {
   int32 weight = 6;
   string image = 7;
 }
+
+message BookOrderReq {
+  int32 cart_id = 1;
+  string isbn = 2;
+  int32 quantity = 3;
+}
+
+message OrderReq {
+  repeated BookOrderReq bookItem = 1;
+}
+
+message OrderRes {
+  int32 code = 1;
+  repeated  BookOrderReq bookItem = 2;
+}
+
 

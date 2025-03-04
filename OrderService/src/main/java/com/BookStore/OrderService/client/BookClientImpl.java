@@ -6,8 +6,14 @@ import com.BookStore.OrderService.model.CartEntity;
 import com.BookStore.modules.bookGrpc.BookRequest;
 import com.BookStore.modules.bookGrpc.BookResponse;
 import com.BookStore.modules.bookGrpc.BookServiceGrpc;
+import com.BookStore.modules.bookGrpc.OrderRes;
+import com.BookStore.modules.bookGrpc.BookOrderReq;
+import  com.BookStore.modules.bookGrpc.OrderReq;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class BookClientImpl implements BookClient {
@@ -32,5 +38,18 @@ public class BookClientImpl implements BookClient {
                 .weight(bookResponse.getWeight())
                 .selected(false)
                 .build();
+    }
+
+    @Override
+    public OrderRes checkQuantityBook(List<CartItemDTO> cartItemDTOList) {
+        List<BookOrderReq> bookOrderReqList = cartItemDTOList.stream().map(item-> BookOrderReq.newBuilder()
+                .setCartId(item.getCartId())
+                .setIsbn(item.getIsbn())
+                .setQuantity(item.getQuantity())
+                .build()).toList();
+        OrderReq orderReq = OrderReq.newBuilder()
+                .addAllBookItem(bookOrderReqList)
+                .build();
+        return bookServiceStub.createOrder(orderReq);
     }
 }

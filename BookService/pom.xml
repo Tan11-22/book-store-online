@@ -34,11 +34,7 @@
 	<dependencies>
 
 		<!--  configuration service -->
-		<dependency>
-			<groupId>com.BookStore</groupId>
-			<artifactId>ConfigurationService</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+
 
 
 
@@ -106,11 +102,16 @@
 			<artifactId>grpc-server-spring-boot-starter</artifactId>
 			<version>3.1.0.RELEASE</version>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>io.grpc</groupId>-->
-<!--			<artifactId>grpc-stub</artifactId>-->
-<!--			<version>${grpc.version}</version>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>com.BookStore</groupId>
+			<artifactId>ConfigurationService</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-stub</artifactId>
+			<version>${grpc.version}</version>
+		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>io.grpc</groupId>-->
 <!--			<artifactId>grpc-protobuf</artifactId>-->
