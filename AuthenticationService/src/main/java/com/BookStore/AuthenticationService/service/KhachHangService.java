@@ -1,4 +1,4 @@
-package com.BookStore.AuthenticationService.Service;
+package com.BookStore.AuthenticationService.service;
 
 import com.BookStore.AuthenticationService.dto.BookStoreResponse;
 import com.BookStore.AuthenticationService.model.KhachHang;

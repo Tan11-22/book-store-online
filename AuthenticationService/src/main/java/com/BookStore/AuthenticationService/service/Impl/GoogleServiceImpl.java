@@ -1,7 +1,7 @@
-package com.BookStore.AuthenticationService.Service.Impl;
+package com.BookStore.AuthenticationService.service.Impl;
 
-import com.BookStore.AuthenticationService.Service.AuthService;
-import com.BookStore.AuthenticationService.Service.GoogleService;
+import com.BookStore.AuthenticationService.service.AuthService;
+import com.BookStore.AuthenticationService.service.GoogleService;
 import com.BookStore.AuthenticationService.dto.BookStoreResponse;
 import com.BookStore.AuthenticationService.dto.UserInfoDTO;
 import com.BookStore.AuthenticationService.jwt.JwtTokenProvider;
@@ -11,11 +11,6 @@ import com.google.gson.JsonObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.client.RestTemplate;
@@ -23,7 +18,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 public class GoogleServiceImpl implements GoogleService {

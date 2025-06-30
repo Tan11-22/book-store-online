@@ -2,7 +2,6 @@ package com.BookStore.AuthenticationService.config;
 
 //import com.BookStore.AuthenticationService.Service.Impl.CustomOAuth2UserService;
 
-import com.BookStore.AuthenticationService.Service.Impl.UserDetailsServiceImpl;
 import com.BookStore.AuthenticationService.jwt.JwtAuthenticationEntryPoint;
 import com.BookStore.AuthenticationService.jwt.JwtAuthenticationFilter;
 import com.BookStore.AuthenticationService.jwt.JwtTokenProvider;
@@ -11,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;

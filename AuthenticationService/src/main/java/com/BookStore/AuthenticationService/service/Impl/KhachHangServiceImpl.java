@@ -1,6 +1,6 @@
-package com.BookStore.AuthenticationService.Service.Impl;
+package com.BookStore.AuthenticationService.service.Impl;
 
-import com.BookStore.AuthenticationService.Service.KhachHangService;
+import com.BookStore.AuthenticationService.service.KhachHangService;
 import com.BookStore.AuthenticationService.dto.BookStoreResponse;
 import com.BookStore.AuthenticationService.model.KhachHang;
 import com.BookStore.AuthenticationService.repository.KhachHangRepository;

@@ -1,6 +1,6 @@
-package com.BookStore.AuthenticationService.Service.Impl;
+package com.BookStore.AuthenticationService.service.Impl;
 
-import com.BookStore.AuthenticationService.Service.NhanVienService;
+import com.BookStore.AuthenticationService.service.NhanVienService;
 import com.BookStore.AuthenticationService.dto.BookStoreResponse;
 import com.BookStore.AuthenticationService.model.NhanVien;
 import com.BookStore.AuthenticationService.repository.NhanVienRepository;

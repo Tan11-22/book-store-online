@@ -1,6 +1,6 @@
 package com.BookStore.AuthenticationService.controller;
 
-import com.BookStore.AuthenticationService.Service.*;
+import com.BookStore.AuthenticationService.service.*;
 import com.BookStore.AuthenticationService.dto.BookStoreResponse;
 import com.BookStore.AuthenticationService.dto.UserInfoDTO;
 import com.BookStore.AuthenticationService.jwt.JwtTokenProvider;

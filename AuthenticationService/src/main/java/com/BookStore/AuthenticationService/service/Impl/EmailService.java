@@ -1,4 +1,4 @@
-package com.BookStore.AuthenticationService.Service.Impl;
+package com.BookStore.AuthenticationService.service.Impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;

@@ -1,6 +1,6 @@
-package com.BookStore.AuthenticationService.Service.Impl;
+package com.BookStore.AuthenticationService.service.Impl;
 
-import com.BookStore.AuthenticationService.Service.AuthService;
+import com.BookStore.AuthenticationService.service.AuthService;
 import com.BookStore.AuthenticationService.jwt.JwtTokenProvider;
 import com.BookStore.AuthenticationService.repository.TaiKhoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;

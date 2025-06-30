@@ -1,6 +1,5 @@
 package com.BookStore.AuthenticationService.jwt;
 
-import com.BookStore.AuthenticationService.Service.Impl.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,8 +21,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+
 
     public JwtAuthenticationFilter() {
     }
