@@ -1,24 +1,24 @@
-package com.BookStore.AuthenticationService.service.Impl;
+package com.BookStore.AuthenticationService.service.impl;
 
 import com.BookStore.AuthenticationService.dto.AuthenticationRequest;
 import com.BookStore.AuthenticationService.dto.AuthenticationResponse;
 import com.BookStore.AuthenticationService.jwt.JwtTokenProvider;
-import com.BookStore.AuthenticationService.model.AccountEntity;
 import com.BookStore.AuthenticationService.service.AccountService;
 import com.BookStore.AuthenticationService.service.AuthenticationService;
 
-import org.hibernate.mapping.Any;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
+    private final UserDetailsService userDetailsService;
     private final AccountService accountService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
@@ -27,7 +27,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Value("${app-jwt-refresh-token-expiration-milliseconds}")
     private long refreshTokenExpiration;
 
-    public AuthenticationServiceImpl(AccountService accountService, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
+    public AuthenticationServiceImpl(UserDetailsService userDetailsService, AccountService accountService, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
+        this.userDetailsService = userDetailsService;
         this.accountService = accountService;
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -36,12 +37,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
         authenticationManager.authenticate(
-            new   UsernamePasswordAuthenticationToken(
+                new UsernamePasswordAuthenticationToken(
                         authenticationRequest.getEmail(),
                         authenticationRequest.getPassword()
                 )
         );
-        AccountEntity accountEntity = accountService.getAccountByEmail(authenticationRequest.getEmail());
+        UserDetails user = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
         String accessToken = null;
         String refreshToken = null;
         accountService.saveRefreshToken(refreshToken);
@@ -54,17 +55,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return "";
     }
 
-    private String createAccessToken(String email, Map<String, ?> claims) {
+    private String createAccessToken(UserDetails user) {
         return jwtTokenProvider.generateToken(
-                email,
+                user.getUsername(),
                 new Date(System.currentTimeMillis() + accessTokenExpiration),
-                claims
+                Collections.emptyMap()
         );
     }
 
-    private String createRefreshToken(String email) {
+    private String createRefreshToken(UserDetails user) {
         return jwtTokenProvider.generateToken(
-                email,
+                user.getUsername(),
                 new Date(System.currentTimeMillis() + refreshTokenExpiration),
                 Collections.emptyMap()
         );

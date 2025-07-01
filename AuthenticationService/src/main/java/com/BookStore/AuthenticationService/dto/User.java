@@ -1,5 +1,6 @@
 package com.BookStore.AuthenticationService.dto;
 
+import com.BookStore.AuthenticationService.model.RoleName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,8 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BookStoreResponse<T> {
-    private Integer code;
-    private String status;
-    private T data;
+public class User {
+    private String username;
+    private String password;
+    private RoleName role;
 }
