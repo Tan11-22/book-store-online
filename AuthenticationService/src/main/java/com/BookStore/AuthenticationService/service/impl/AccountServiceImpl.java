@@ -27,4 +27,9 @@ public class AccountServiceImpl implements AccountService {
     public AccountEntity getAccountByEmail(String email) {
         return accountRepository.findByEmail(email).orElseThrow();
     }
+
+    @Override
+    public AccountEntity getAccountByRefreshToken(String refreshToken) {
+        return accountRepository.findByRefreshToken(refreshToken).orElseThrow();
+    }
 }

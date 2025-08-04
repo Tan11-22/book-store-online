@@ -3,18 +3,21 @@ package com.BookStore.AuthenticationService.service.impl;
 import com.BookStore.AuthenticationService.dto.AuthenticationRequest;
 import com.BookStore.AuthenticationService.dto.AuthenticationResponse;
 import com.BookStore.AuthenticationService.jwt.JwtTokenProvider;
+import com.BookStore.AuthenticationService.model.AccountEntity;
 import com.BookStore.AuthenticationService.service.AccountService;
 import com.BookStore.AuthenticationService.service.AuthenticationService;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -34,6 +37,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
+
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
         authenticationManager.authenticate(
@@ -43,23 +47,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 )
         );
         UserDetails user = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
-        String accessToken = null;
-        String refreshToken = null;
+        String accessToken = createAccessToken(user);
+        String refreshToken = createRefreshToken(user);
         accountService.saveRefreshToken(refreshToken);
-        return new AuthenticationResponse(accessToken, refreshToken);
+        return AuthenticationResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
     }
 
     @Override
     public String refreshToken(String refreshToken) {
         String email = jwtTokenProvider.extractEmail(refreshToken);
-        return "";
+        UserDetails currentUserDetails = userDetailsService.loadUserByUsername(email);
+        AccountEntity refreshTokenUserDetails = accountService.getAccountByRefreshToken(refreshToken);
+        if (currentUserDetails.getUsername().equals(refreshTokenUserDetails.getEmail())) {
+            return createAccessToken(currentUserDetails);
+        } else throw new AuthenticationServiceException("Invalid refresh token");
     }
 
     private String createAccessToken(UserDetails user) {
         return jwtTokenProvider.generateToken(
                 user.getUsername(),
                 new Date(System.currentTimeMillis() + accessTokenExpiration),
-                Collections.emptyMap()
+                createCustomClaims(user)
         );
     }
 
@@ -67,8 +75,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return jwtTokenProvider.generateToken(
                 user.getUsername(),
                 new Date(System.currentTimeMillis() + refreshTokenExpiration),
-                Collections.emptyMap()
+                createCustomClaims(user)
         );
+    }
+
+    private Map<String, ?> createCustomClaims(UserDetails user) {
+        Map<String, Object> claims = new HashMap<>();
+//        claims.put("email", user.getUsername());
+        claims.put("roleName", user.getAuthorities());
+        return claims;
     }
 
 }

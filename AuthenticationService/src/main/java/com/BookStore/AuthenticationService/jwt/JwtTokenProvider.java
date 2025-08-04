@@ -23,6 +23,7 @@ import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
@@ -32,7 +33,11 @@ public class JwtTokenProvider {
     @Value("${app.jwt-secret}")
     private String jwtSecret;
 
+    @Value("${app-jwt-access-token-expiration-milliseconds}")
+    private long accessTokenExpiration;
 
+    @Value("${app-jwt-refresh-token-expiration-milliseconds}")
+    private long refreshTokenExpiration;
 
     public String generateToken(String subject, Date expiration, Map<String, ?> additionalClaims) {
         return Jwts.builder()
@@ -44,7 +49,17 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    public String generateAccessToken(String email) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "access");
+        return generateToken(email, new Date(System.currentTimeMillis() + accessTokenExpiration), claims);
+    }
 
+    public String generateRefreshToken(String email) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "refresh");
+        return generateToken(email, new Date(System.currentTimeMillis() + refreshTokenExpiration), claims);
+    }
 
     private Key signingKey() {
         return Keys.hmacShaKeyFor(

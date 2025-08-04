@@ -5,6 +5,9 @@ package com.BookStore.AuthenticationService.config;
 import com.BookStore.AuthenticationService.jwt.JwtAuthenticationEntryPoint;
 import com.BookStore.AuthenticationService.jwt.JwtAuthenticationFilter;
 import com.BookStore.AuthenticationService.jwt.JwtTokenProvider;
+import com.BookStore.AuthenticationService.security.CustomOAuth2UserService;
+import com.BookStore.AuthenticationService.security.OAuth2LoginSuccessHandler;
+import com.BookStore.AuthenticationService.service.impl.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,9 +35,12 @@ public class SpringSecurityConfig {
 
     @Autowired
     private JwtAuthenticationEntryPoint unauthorizedHandler;
-//
-//    @Autowired
-//    private CustomOAuth2UserService oauthUserService;
+    //
+    @Autowired
+    private CustomOAuth2UserService oauth2UserService;
+
+    @Autowired
+    private OAuth2LoginSuccessHandler oauth2LoginSuccessHandler;
 
 
     @Bean
@@ -73,20 +79,20 @@ public class SpringSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((authorize) -> {
-                    authorize.requestMatchers("/api/authentication-service/login",
-                                    "/api/authentication-service/quen-mat-khau",
-                                    "/api/authentication-service/dang-ky",
-                                    "/api/authentication-service/valid",
-                                    "/actuator/health",
-                                    "/api/authentication-service/login1",
-                                    "/api/authentication-service/login-google",
-                                    "/api/authentication-service/login-google-callback",
-                                    "/oauth2/**"
+                    authorize.requestMatchers(
+                                    "/api/authentication-service/auth/login",
+                                    "/api/authentication-service/auth/refresh-token"
                             )
                             .permitAll();
                     authorize.anyRequest().authenticated();
                 });
-//        httpSecurity.oauth2Login(Customizer.withDefaults());
+        // Configure OAuth2 Login
+        httpSecurity.oauth2Login(oauth2 -> oauth2
+                .userInfoEndpoint(userInfo -> userInfo
+                        .userService(oauth2UserService)
+                )
+                .successHandler(oauth2LoginSuccessHandler)
+        );
 
         httpSecurity.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         httpSecurity.authenticationProvider(authenticationProvider());
