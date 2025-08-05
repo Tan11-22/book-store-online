@@ -54,7 +54,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         } else {
             // Register new user
             RoleEntity userRole = roleRepository.findByRoleName("USER")
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    .orElseGet(() -> {
+                        RoleEntity newRole = new RoleEntity();
+                        newRole.setRoleName("USER");
+                        return roleRepository.save(newRole);
+                    });
             
             account = new AccountEntity();
             account.setEmail(email);
@@ -65,6 +69,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             accountRepository.save(account);
         }
 
-        return oAuth2User;
+        return new CustomOAuth2User( oAuth2User);
     }
 }

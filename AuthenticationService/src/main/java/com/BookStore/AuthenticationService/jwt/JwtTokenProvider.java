@@ -3,25 +3,14 @@ package com.BookStore.AuthenticationService.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.hibernate.mapping.Any;
-import org.json.JSONArray;
-import org.json.JSONObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.net.URL;
+
 import java.security.Key;
-import java.security.KeyFactory;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,11 +22,12 @@ public class JwtTokenProvider {
     @Value("${app.jwt-secret}")
     private String jwtSecret;
 
-    @Value("${app-jwt-access-token-expiration-milliseconds}")
+    @Value("${app.jwt-access-token-expiration-milliseconds}")
     private long accessTokenExpiration;
 
-    @Value("${app-jwt-refresh-token-expiration-milliseconds}")
+    @Value("${app.jwt-refresh-token-expiration-milliseconds}")
     private long refreshTokenExpiration;
+
 
     public String generateToken(String subject, Date expiration, Map<String, ?> additionalClaims) {
         return Jwts.builder()

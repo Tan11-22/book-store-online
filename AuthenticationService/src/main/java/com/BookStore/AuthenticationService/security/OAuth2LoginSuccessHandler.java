@@ -2,6 +2,7 @@ package com.BookStore.AuthenticationService.security;
 
 import com.BookStore.AuthenticationService.jwt.JwtTokenProvider;
 import com.BookStore.AuthenticationService.model.AccountEntity;
+import com.BookStore.AuthenticationService.security.CustomOAuth2User;
 import com.BookStore.AuthenticationService.repository.AccountRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,9 +26,10 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws IOException {
+        
         CustomOAuth2User oauthUser = (CustomOAuth2User) authentication.getPrincipal();
         String email = oauthUser.getEmail();
-        
+        System.out.println(email);
         // Generate tokens
         String accessToken = jwtTokenProvider.generateAccessToken(email);
         String refreshToken = jwtTokenProvider.generateRefreshToken(email);

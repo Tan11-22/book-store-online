@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Entity
 @Table(name = "ROLE")
 @Data
@@ -17,12 +15,9 @@ import java.util.List;
 public class RoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ROLE_ID")
     private Integer roleId;
 
-    @Enumerated(EnumType.STRING)
-    private RoleName roleName;
-
-    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
-    private List<AccountEntity> accounts;
+    @Column(name = "ROLE_NAME", unique = true, nullable = false)
+    private String roleName;
 }
-

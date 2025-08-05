@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 
                 // Create authorities list from account role
                 List<GrantedAuthority> authorities = Collections.singletonList(
-                    new SimpleGrantedAuthority("ROLE_" + account.getRole().getRoleName().name())
+                    new SimpleGrantedAuthority("ROLE_" + account.getRole().getRoleName())
                 );
                 
                 // Create authentication object

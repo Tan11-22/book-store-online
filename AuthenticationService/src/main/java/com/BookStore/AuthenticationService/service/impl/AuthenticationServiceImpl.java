@@ -25,9 +25,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AccountService accountService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
-    @Value("${app-jwt-access-token-expiration-milliseconds}")
+    @Value("${app.jwt-access-token-expiration-milliseconds}")
     private long accessTokenExpiration;
-    @Value("${app-jwt-refresh-token-expiration-milliseconds}")
+    @Value("${app.jwt-refresh-token-expiration-milliseconds}")
     private long refreshTokenExpiration;
 
     public AuthenticationServiceImpl(UserDetailsService userDetailsService, AccountService accountService, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {

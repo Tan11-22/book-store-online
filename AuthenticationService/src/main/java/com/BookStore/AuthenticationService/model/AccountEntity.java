@@ -16,24 +16,34 @@ import java.time.LocalDateTime;
 @Builder
 public class AccountEntity {
     @Id
+    @Column(name = "EMAIL")
     private String email;
-    @Column(nullable = true)
+
+    @Column(name = "PASSWORD", nullable = true)
     private String password;
+
+    @Column(name = "STATUS")
     private Boolean status;
-    @Column(unique = true, nullable = true) // Google ID must be unique if it exists
+
+    @Column(name = "GOOGLE_ID", unique = true, nullable = true)
     private String googleId;
+
+    @Column(name = "VERIFIED")
     private boolean verified = false;
-    @Column(columnDefinition = "TEXT", nullable = true)
+
+    @Column(name = "REFRESH_TOKEN", columnDefinition = "TEXT", nullable = true)
     private String refreshToken;
 
-    @Column(nullable = true)
+    @Column(name = "REFRESH_TOKEN_EXPIRY", nullable = true)
     private LocalDateTime refreshTokenExpiry;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.EAGER) // EAGER fetch is often useful for roles
     @JoinColumn(name = "ROLE_ID")
     private RoleEntity role;
+
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private CustomerEntity customer;
+
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private EmployeeEntity employee;
 }
-
