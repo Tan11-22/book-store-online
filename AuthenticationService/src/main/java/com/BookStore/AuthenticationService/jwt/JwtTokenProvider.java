@@ -3,25 +3,17 @@ package com.BookStore.AuthenticationService.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.json.JSONArray;
-import org.json.JSONObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.net.URL;
+
 import java.security.Key;
-import java.security.KeyFactory;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtTokenProvider {
@@ -30,64 +22,63 @@ public class JwtTokenProvider {
     @Value("${app.jwt-secret}")
     private String jwtSecret;
 
-    @Value("${app-jwt-expiration-milliseconds}")
-    private long jwtExpirationDate;
+    @Value("${app.jwt-access-token-expiration-milliseconds}")
+    private long accessTokenExpiration;
 
-    public String generateToken(Authentication authentication) {
-        String username = authentication.getName();
+    @Value("${app.jwt-refresh-token-expiration-milliseconds}")
+    private long refreshTokenExpiration;
 
-        String role = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .findFirst()
-                .orElse(null);
 
-        Date currentDate = new Date();
-        Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
-        String token = Jwts.builder()
-                .setSubject(username)
-                .claim("role", role)
-                .setIssuedAt(new Date())
-                .setExpiration(expireDate)
-                .signWith(key())
+    public String generateToken(String subject, Date expiration, Map<String, ?> additionalClaims) {
+        return Jwts.builder()
+                .setClaims(additionalClaims)
+                .setSubject(subject)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(expiration)
+                .signWith(signingKey())
                 .compact();
-        return token;
     }
 
-    public String generateToken1(String username , String role) {
-        Date currentDate = new Date();
-        Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
-        String token = Jwts.builder()
-                .setSubject(username)
-                .claim("role", role)
-                .setIssuedAt(new Date())
-                .setExpiration(expireDate)
-                .signWith(key())
-                .compact();
-        return token;
+    public String generateAccessToken(String email) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "access");
+        return generateToken(email, new Date(System.currentTimeMillis() + accessTokenExpiration), claims);
     }
 
-    private Key key() {
+    public String generateRefreshToken(String email) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "refresh");
+        return generateToken(email, new Date(System.currentTimeMillis() + refreshTokenExpiration), claims);
+    }
+
+    private Key signingKey() {
         return Keys.hmacShaKeyFor(
                 Decoders.BASE64.decode(jwtSecret));
     }
 
-    public String getUsername(String token) {
+    public String extractEmail(String token) {
         Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key())
+                .setSigningKey(signingKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        String username = claims.getSubject();
-        return username;
+        return claims.getSubject();
     }
 
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(signingKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
 
 
 
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
-                    .setSigningKey(key())
+                    .setSigningKey(signingKey())
                     .build()
                     .parse(token);
             return true;

@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: authentication-service
+
+  config:
+    import: optional:file:.env.properties
+
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASS}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    hibernate:
+      ddl-auto: none
+    generate-ddl: false
+    show-sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USER}
+    password: ${MAIL_PASS}
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+            required: true
+          auth: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            redirect-uri: http://localhost:3002/login/oauth2/code/google
+            scope:
+              - email
+              - profile
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+
+server:
+  port: 3002
+
+app:
+  jwt-secret: ${APP_JWT_SECRET}
+  jwt-access-token-expiration-milliseconds: ${APP_JWT_ACCESS_EXP}
+  jwt-refresh-token-expiration-milliseconds: ${APP_JWT_REFRESH_EXP}
