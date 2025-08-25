@@ -1,13 +1,19 @@
-name: CI Build and Push to Docker Hub
+name: CI Build and Push AuthenticationService
 
 on:
   workflow_dispatch:
   push:
     branches: [ "main" ]
+    # ADD THIS PATHS FILTER
+    paths:
+      - 'AuthenticationService/**'
 
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./AuthenticationService
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -29,7 +35,7 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/book-store-online/authentication-service"
+          IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/authentication-service"
           IMAGE_TAG="${{ github.sha }}"
           docker build . -t "${IMAGE_NAME}:${IMAGE_TAG}"
           docker push "${IMAGE_NAME}:${IMAGE_TAG}"
