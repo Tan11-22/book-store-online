@@ -1,0 +1,79 @@
+name: ci/cd authentication service
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'AuthenticationService/**'
+
+env:
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/authentication-service
+  CONTAINER_NAME: authentication-service
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./AuthenticationService
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./AuthenticationService
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:latest
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get secrets from Azure Key Vault
+        id: get-secrets
+        uses: Azure/get-keyvault-secrets@v1.3
+        with:
+          keyvault: ${{ secrets.AZURE_KEY_VAULT_NAME }}
+          secrets: 'db-pass, db-url, db-user, google-id, google-secret, jwt-secret, mail-pass, mail-user'
+
+      - name: Deploy to Azure VM
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+            docker pull ${{ env.IMAGE_NAME }}:latest
+            docker stop ${{ env.CONTAINER_NAME }} || true
+            docker rm ${{ env.CONTAINER_NAME }} || true
+            docker run -d --name ${{ env.CONTAINER_NAME }} -p 8080:8080 --restart unless-stopped \
+              -e DATABASE_URL="${{ steps.get-secrets.outputs.db-url }}" \
+              -e POSTGRES_USER="${{ steps.get-secrets.outputs.db-user }}" \
+              -e POSTGRES_PASS="${{ steps.get-secrets.outputs.db-pass }}" \
+              -e GOOGLE_CLIENT_ID="${{ steps.get-secrets.outputs.google-id }}" \
+              -e GOOGLE_CLIENT_SECRET="${{ steps.get-secrets.outputs.google-secret }}" \
+              -e MAIL_USER="${{ steps.get-secrets.outputs.mail-user }}" \
+              -e MAIL_PASS="${{ steps.get-secrets.outputs.mail-pass }}" \
+              -e APP_JWT_SECRET="${{ steps.get-secrets.outputs.jwt-secret }}" \
+              -e SPRING_PROFILES_ACTIVE="prod" \
+              ${{ env.IMAGE_NAME }}:latest
+            docker image prune -f

@@ -81,7 +81,8 @@ public class SpringSecurityConfig {
                 .authorizeHttpRequests((authorize) -> {
                     authorize.requestMatchers(
                                     "/api/authentication-service/auth/login",
-                                    "/api/authentication-service/auth/refresh-token"
+                                    "/api/authentication-service/auth/refresh-token",
+                                   "/api/test"
                             )
                             .permitAll();
                     authorize.anyRequest().authenticated();
