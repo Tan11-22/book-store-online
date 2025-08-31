@@ -49,7 +49,7 @@ jobs:
 
       - name: Get secrets from Azure Key Vault
         id: get-secrets
-        uses: Azure/get-keyvault-secrets@v1.3
+        uses: Azure/get-keyvault-secrets@v1
         with:
           keyvault: ${{ secrets.AZURE_KEY_VAULT_NAME }}
           secrets: 'db-pass, db-url, db-user, google-id, google-secret, jwt-secret, mail-pass, mail-user'
